@@ -1,63 +1,74 @@
-atlas/
-  README.md                ← Ponto de partida (como rodar, contribuir)
-  pyproject.toml           ← Dependências e ferramentas (ruff, black, mypy, pytest)
-  Dockerfile               ← Empacotamento para rodar igual em qualquer máquina
-  docker-compose.yml       ← (Opcional) Sobe serviços de apoio (ex.: Redis, DB)
-  Makefile                 ← Atalhos: fmt, lint, test, run, build
-  .env.example             ← Variáveis de ambiente (sem segredos)
-  .github/workflows/ci.yml ← CI (lint + typecheck + tests + build)
+# Projeto ATLAS — Arquitetura de Rede e Segurança
 
-  atlas/                   ← Código-fonte do produto (pacote Python)
-    __init__.py
-    configs/               ← Configurações por ambiente (validadas)
-      base.yml
-      dev.yml
-      prod.yml
-      schemas/             ← Esquemas Pydantic garantindo config correta
-        config.py
-    utils/                 ← Utilidades transversais
-      logger.py            ← Logging estruturado (JSON) com correlação
-      helpers.py
-      time.py              ← Funções de tempo seguras (timezone-aware)
-    io/                    ← Formatos de entrada/saída padronizados
-      models.py            ← Pydantic: eventos, alertas, resultados
-      adapters/            ← Conectores (arquivos, S3, Kafka, etc.)
-        files.py
-        s3.py
-        kafka.py
-    core/                  ← “Motor” do sistema
-      pipeline.py          ← Orquestra N analisadores; agrega resultados
-      scheduler.py         ← Agendador/assíncrono (opcional)
-      repositories/        ← Persistência (memória, FS, SQL) isolada do core
-        memory.py
-        filesystem.py
-        sql.py
-      services/            ← Regras/Enriquecimento (lógica de negócio)
-        rules_engine.py
-        enrichment.py
-    analyzers/             ← “Cérebros” do Atlas (plugins)
-      base_analyzer.py     ← Contrato único: analyze(Input)->Output + metadata()
-      behavior_analyzer.py
-      log_analyzer.py
-      network_analyzer.py
-      threat_intel_analyzer.py
-      plugins/             ← (Opcional) Descoberta dinâmica
-    interfaces/            ← Ponto de entrada para usuários/automação
-      cli.py               ← CLI (Typer): run, validate-config, list-analyzers
-      api/                 ← (Opcional) FastAPI p/ servir/monitorar
-        app.py
-        routers/
-          health.py
-          runs.py
-          analyzers.py
+> Arquitetura de referência para redes corporativas com foco em segmentação, visibilidade e resposta a incidentes.
 
-  tests/                   ← Testes (unit → integration → e2e)
-    unit/
-    integration/
-    e2e/
-    data/fixtures/         ← Dados sintéticos base
-  docs/                    ← Documentação do time/produto
-    architecture.md        ← Diagramas + fluxo (mermaid/C4)
-    analyzers.md           ← Como criar/estender analisadores
-    ops.md                 ← Observabilidade, deploy, troubleshooting
-    configs.md             ← Esquemas, exemplos e overrides
+## 🎯 Objetivos
+- Minimizar superfície de ataque e isolar domínios de confiança.
+- Padronizar controles (perímetro, interno e identidade).
+- Centralizar **logs** em **SIEM/SOC** e orquestrar resposta via **Cloud Services Incident Response**.
+- Habilitar trilhas de auditoria e governança de acesso (SSO/MFA).
+
+---
+
+## 🗺️ Arquitetura (Visão Geral)
+
+> O diagrama abaixo é renderizado automaticamente pelo GitHub via **Mermaid**.  
+> Linhas **contínuas** = tráfego/fluxo; **tracejadas** = **logs/telemetria**; **pontos** vermelhos = ameaças.
+
+```mermaid
+flowchart TB
+    %% --- NODES ---
+    subgraph InternetZone[Internet / Ameaças Externas]
+      INET(Internet):::infra
+      SQLI[[SQL Injection]]:::threat
+      PORTSCAN[[Port Scan]]:::threat
+    end
+
+    DMZ(DMZ<br/>(Filtered)):::infra
+    FW(Firewall Perímetro<br/>(Inspected)):::control
+    NET(Rede Interna):::infra
+
+    WIFI(WiFi / Guest<br/>VLAN 20 · Isolated):::infra
+    DC(Data Center):::infra
+    BKP(Backup Storage):::cloud
+    DB(Banco de Dados):::infra
+
+    USERS(Usuários):::users
+    WS(Estados de Trabalho):::users
+    MOB(Dispositivos Móveis):::users
+
+    IAM(IAM Platform<br/>SSO/MFA):::control
+    SIEM(SIEM / SOC):::control
+    IR(Cloud Services<br/>Incident Response):::cloud
+
+    %% --- FLOWS (DATA/TRÁFEGO) ---
+    INET --> DMZ --> FW --> NET
+    NET --> USERS
+    USERS --> WS
+    USERS --> MOB
+    NET --> WIFI
+    NET --> DC --> DB
+    DC --> BKP
+
+    %% --- Ameaças direcionadas ---
+    SQLI -.-> DB
+    PORTSCAN -.-> IR
+
+    %% --- Integrações de Segurança (LOGS) ---
+    FW -. Logs .-> SIEM
+    NET -. Logs .-> SIEM
+    DC -. Logs .-> SIEM
+    DB -. Logs .-> SIEM
+    WS -. Logs .-> SIEM
+    MOB -. Logs .-> SIEM
+    IAM -. Logs .-> SIEM
+    SIEM -->|Alerts| IR
+    NET -->|Encrypted*| IAM
+    USERS -->|Auth| IAM
+
+    %% --- STYLES ---
+    classDef threat fill:#ff5b5b,stroke:#b30000,color:#fff,font-weight:bold;
+    classDef control fill:#6aa5ff,stroke:#2b6bff,color:#fff;
+    classDef infra fill:#3ddc97,stroke:#2ca26f,color:#fff;
+    classDef users fill:#d66bff,stroke:#a445d6,color:#fff;
+    classDef cloud fill:#5fd1ff,stroke:#2699c7,color:#003b4f;
