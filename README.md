@@ -3,7 +3,7 @@
 
 ## 🚀 Roadmap de Desenvolvimento
 
-### 🧠 Fase 1 — Desenvolvimento Funcional (0–12 meses)
+### Fase 1 — Desenvolvimento Funcional (0–12 meses)
 
 | Mês | Entregas | Responsável |
 |-----|-----------|-------------|
@@ -15,7 +15,7 @@
 
 ---
 
-### ⚙️ Fase 2 — Refinamento (12–18 meses)
+### Fase 2 — Refinamento (12–18 meses)
 
 | Mês | Entregas | Responsável |
 |-----|-----------|-------------|
@@ -25,7 +25,7 @@
 
 ---
 
-## 📈 Gráfico de Progresso (Gantt Simplificado)
+## Gráfico de Progresso (Gantt Simplificado)
 
 ```text
 Fase 1 — Desenvolvimento Funcional (0–12 meses)
