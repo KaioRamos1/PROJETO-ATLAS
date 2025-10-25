@@ -1,74 +1,45 @@
 # Projeto ATLAS — Arquitetura de Rede e Segurança
+---
 
-> Arquitetura de referência para redes corporativas com foco em segmentação, visibilidade e resposta a incidentes.
+## 🚀 Roadmap de Desenvolvimento
 
-## 🎯 Objetivos
-- Minimizar superfície de ataque e isolar domínios de confiança.
-- Padronizar controles (perímetro, interno e identidade).
-- Centralizar **logs** em **SIEM/SOC** e orquestrar resposta via **Cloud Services Incident Response**.
-- Habilitar trilhas de auditoria e governança de acesso (SSO/MFA).
+### 🧠 Fase 1 — Desenvolvimento Funcional (0–12 meses)
+
+| Mês | Entregas | Responsável |
+|-----|-----------|-------------|
+| 1–3 | Estrutura base, containers, setup de ambiente | Kaio |
+| 2–6 | Sensores de rede e arquivo em operação | Kaiky / Derick |
+| 5–9 | Analisadores e integração com core | Kaio |
+| 6–10 | Dashboard inicial conectado à API | Pedro |
+| 10–12 | Integração total e testes funcionais | Todos |
 
 ---
 
-## 🗺️ Arquitetura (Visão Geral)
+### ⚙️ Fase 2 — Refinamento (12–18 meses)
 
-> O diagrama abaixo é renderizado automaticamente pelo GitHub via **Mermaid**.  
-> Linhas **contínuas** = tráfego/fluxo; **tracejadas** = **logs/telemetria**; **pontos** vermelhos = ameaças.
+| Mês | Entregas | Responsável |
+|-----|-----------|-------------|
+| 13–14 | Hardening e otimização de rede/arquivos | Kaiky / Derick |
+| 14–16 | UI/UX aprimorada e documentação de uso | Pedro |
+| 16–18 | Testes finais, empacotamento e release oficial | Kaio / Todos |
 
-```mermaid
-flowchart TB
-    %% --- NODES ---
-    subgraph InternetZone[Internet / Ameaças Externas]
-      INET(Internet):::infra
-      SQLI[[SQL Injection]]:::threat
-      PORTSCAN[[Port Scan]]:::threat
-    end
+---
 
-    DMZ(DMZ<br/>(Filtered)):::infra
-    FW(Firewall Perímetro<br/>(Inspected)):::control
-    NET(Rede Interna):::infra
+## 📈 Gráfico de Progresso (Gantt Simplificado)
 
-    WIFI(WiFi / Guest<br/>VLAN 20 · Isolated):::infra
-    DC(Data Center):::infra
-    BKP(Backup Storage):::cloud
-    DB(Banco de Dados):::infra
+```text
+Fase 1 — Desenvolvimento Funcional (0–12 meses)
+┌──────────────────────────────────────────────────────────────────────────┐
+| Kaio   |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                | Core & Integração
+| Kaiky  |    ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                         | Sensores de Rede
+| Derick |       ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                      | FIM & Malware
+| Pedro  |               ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■              | Dashboard e UI
+└──────────────────────────────────────────────────────────────────────────┘
 
-    USERS(Usuários):::users
-    WS(Estados de Trabalho):::users
-    MOB(Dispositivos Móveis):::users
-
-    IAM(IAM Platform<br/>SSO/MFA):::control
-    SIEM(SIEM / SOC):::control
-    IR(Cloud Services<br/>Incident Response):::cloud
-
-    %% --- FLOWS (DATA/TRÁFEGO) ---
-    INET --> DMZ --> FW --> NET
-    NET --> USERS
-    USERS --> WS
-    USERS --> MOB
-    NET --> WIFI
-    NET --> DC --> DB
-    DC --> BKP
-
-    %% --- Ameaças direcionadas ---
-    SQLI -.-> DB
-    PORTSCAN -.-> IR
-
-    %% --- Integrações de Segurança (LOGS) ---
-    FW -. Logs .-> SIEM
-    NET -. Logs .-> SIEM
-    DC -. Logs .-> SIEM
-    DB -. Logs .-> SIEM
-    WS -. Logs .-> SIEM
-    MOB -. Logs .-> SIEM
-    IAM -. Logs .-> SIEM
-    SIEM -->|Alerts| IR
-    NET -->|Encrypted*| IAM
-    USERS -->|Auth| IAM
-
-    %% --- STYLES ---
-    classDef threat fill:#ff5b5b,stroke:#b30000,color:#fff,font-weight:bold;
-    classDef control fill:#6aa5ff,stroke:#2b6bff,color:#fff;
-    classDef infra fill:#3ddc97,stroke:#2ca26f,color:#fff;
-    classDef users fill:#d66bff,stroke:#a445d6,color:#fff;
-    classDef cloud fill:#5fd1ff,stroke:#2699c7,color:#003b4f;
+Fase 2 — Refinamento e Otimização (12–18 meses)
+┌──────────────────────────────────────────────────────────────────────────┐
+| Kaio   |                                             ■■■■■■■■■■■■■■■■    | Testes & Release
+| Kaiky  |                                             ■■■■■■■■■■■■■■■■    | Segurança e Hardening
+| Derick |                                             ■■■■■■■■■■■■■■■■    | Regras & Heurísticas
+| Pedro  |                                             ■■■■■■■■■■■■■■■■    | UX/UI e Documentação
+└──────────────────────────────────────────────────────────────────────────┘
